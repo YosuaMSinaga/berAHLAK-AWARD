@@ -10,11 +10,20 @@ use Illuminate\Support\Facades\Auth;
 
 class PenilaianController extends Controller
 {
+    /**
+     * Menampilkan daftar penilaian
+     */
     public function index()
     {
         $periode = Setting::where('status', 'aktif')
             ->orderBy('periode', 'desc')
             ->first()?->periode;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Belum ada periode aktif
+        |--------------------------------------------------------------------------
+        */
 
         if (!$periode) {
             return view('penilaian.index', [
@@ -23,32 +32,89 @@ class PenilaianController extends Controller
             ]);
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil semua penilaian pada periode aktif
+        |--------------------------------------------------------------------------
+        */
+
         $penilaian = Penilaian::where('periode', $periode)
-            ->where('nip_pengisi', Auth::user()->id)
             ->latest()
             ->get();
 
-        return view('penilaian.index', compact(
-            'penilaian',
-            'periode'
-        ));
+
+        return view('penilaian.index', [
+            'penilaian' => $penilaian,
+            'periode' => $periode,
+        ]);
     }
 
+
+    /**
+     * Menampilkan form tambah penilaian
+     */
     public function create()
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil semua setting yang aktif
+        |--------------------------------------------------------------------------
+        */
+
         $settings = Setting::where('status', 'aktif')
             ->orderBy('value')
             ->get();
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Jika tidak ada periode aktif
+        |--------------------------------------------------------------------------
+        */
+
         if ($settings->isEmpty()) {
-            return back()->with('error', 'Belum ada periode penilaian yang aktif.');
+            return redirect()
+                ->route('penilaian.index')
+                ->with(
+                    'error',
+                    'Belum ada periode penilaian yang aktif. Silakan buat periode terlebih dahulu di Pengaturan Aplikasi.'
+                );
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil periode aktif
+        |--------------------------------------------------------------------------
+        */
 
         $periode = $settings->first()->periode;
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil data nilai
+        |--------------------------------------------------------------------------
+        */
+
         $nilai = Nilai::orderBy('id')->get();
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Kelompokkan berdasarkan Core Value
+        |--------------------------------------------------------------------------
+        */
+
         $nilaiGrouped = $nilai->groupBy('value');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Tampilkan FORM
+        |--------------------------------------------------------------------------
+        */
 
         return view('penilaian.form', [
             'settings' => $settings,
@@ -57,46 +123,67 @@ class PenilaianController extends Controller
         ]);
     }
 
+
+    /**
+     * Menyimpan penilaian baru
+     */
     public function store(Request $request)
     {
         $settings = Setting::where('status', 'aktif')
             ->orderBy('value')
             ->get();
 
+
         if ($settings->isEmpty()) {
-            return back()->with('error', 'Belum ada periode penilaian yang aktif.');
+            return redirect()
+                ->route('penilaian.index')
+                ->with(
+                    'error',
+                    'Belum ada periode penilaian yang aktif.'
+                );
         }
+
 
         $periode = $settings->first()->periode;
 
         $rules = [];
 
+
         foreach ($settings as $setting) {
-            $rules["pilihan_{$setting->value}"] = [
+
+            $key = "pilihan_{$setting->value}";
+
+            $rules[$key] = [
                 'required',
                 'array',
                 'size:' . $setting->jum_pilihan,
             ];
 
-            $rules["pilihan_{$setting->value}.*"] = [
+            $rules[$key . '.*'] = [
                 'required',
                 'integer',
             ];
         }
 
+
         $validated = $request->validate($rules);
 
         $pilihanBerakhlak = [];
 
+
         foreach ($settings as $setting) {
+
             $key = "pilihan_{$setting->value}";
 
             foreach ($validated[$key] as $nilaiId) {
+
                 $nilai = Nilai::where('id', (int) $nilaiId)
                     ->where('value', $setting->value)
                     ->first();
 
+
                 if (!$nilai) {
+
                     return back()
                         ->withErrors([
                             $key => "Pilihan {$setting->value} tidak valid.",
@@ -104,28 +191,57 @@ class PenilaianController extends Controller
                         ->withInput();
                 }
 
+
                 $pilihanBerakhlak[] = (int) $nilai->id;
             }
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Simpan penilaian
+        |--------------------------------------------------------------------------
+        */
+
         Penilaian::create([
             'timestamp' => now(),
             'periode' => $periode,
+
+            /*
+             * Admin yang membuat penilaian.
+             */
             'nip_pengisi' => Auth::user()->id,
+
             'pilihan_berakhlak' => $pilihanBerakhlak,
+
             'pilihan_pegawai' => [],
         ]);
 
+
         return redirect()
             ->route('penilaian.index')
-            ->with('success', 'Penilaian berhasil disimpan.');
+            ->with(
+                'success',
+                'Penilaian berhasil disimpan.'
+            );
     }
 
+
+    /**
+     * Detail penilaian
+     */
     public function show(Penilaian $penilaian)
     {
-        return view('penilaian.show', compact('penilaian'));
+        return view(
+            'penilaian.show',
+            compact('penilaian')
+        );
     }
 
+
+    /**
+     * Form edit penilaian
+     */
     public function edit(Penilaian $penilaian)
     {
         $settings = Setting::where('status', 'aktif')
@@ -136,6 +252,7 @@ class PenilaianController extends Controller
 
         $nilaiGrouped = $nilai->groupBy('value');
 
+
         return view('penilaian.form', [
             'penilaian' => $penilaian,
             'settings' => $settings,
@@ -144,40 +261,56 @@ class PenilaianController extends Controller
         ]);
     }
 
-    public function update(Request $request, Penilaian $penilaian)
-    {
+
+    /**
+     * Update penilaian
+     */
+    public function update(
+        Request $request,
+        Penilaian $penilaian
+    ) {
         $settings = Setting::where('status', 'aktif')
             ->orderBy('value')
             ->get();
 
         $rules = [];
 
+
         foreach ($settings as $setting) {
-            $rules["pilihan_{$setting->value}"] = [
+
+            $key = "pilihan_{$setting->value}";
+
+            $rules[$key] = [
                 'required',
                 'array',
                 'size:' . $setting->jum_pilihan,
             ];
 
-            $rules["pilihan_{$setting->value}.*"] = [
+            $rules[$key . '.*'] = [
                 'required',
                 'integer',
             ];
         }
 
+
         $validated = $request->validate($rules);
 
         $pilihanBerakhlak = [];
 
+
         foreach ($settings as $setting) {
+
             $key = "pilihan_{$setting->value}";
 
             foreach ($validated[$key] as $nilaiId) {
+
                 $nilai = Nilai::where('id', (int) $nilaiId)
                     ->where('value', $setting->value)
                     ->first();
 
+
                 if (!$nilai) {
+
                     return back()
                         ->withErrors([
                             $key => "Pilihan {$setting->value} tidak valid.",
@@ -185,26 +318,40 @@ class PenilaianController extends Controller
                         ->withInput();
                 }
 
+
                 $pilihanBerakhlak[] = (int) $nilai->id;
             }
         }
+
 
         $penilaian->update([
             'timestamp' => now(),
             'pilihan_berakhlak' => $pilihanBerakhlak,
         ]);
 
+
         return redirect()
             ->route('penilaian.index')
-            ->with('success', 'Penilaian berhasil diperbarui.');
+            ->with(
+                'success',
+                'Penilaian berhasil diperbarui.'
+            );
     }
 
+
+    /**
+     * Hapus penilaian
+     */
     public function destroy(Penilaian $penilaian)
     {
         $penilaian->delete();
 
+
         return redirect()
             ->route('penilaian.index')
-            ->with('success', 'Penilaian berhasil dihapus.');
+            ->with(
+                'success',
+                'Penilaian berhasil dihapus.'
+            );
     }
 }

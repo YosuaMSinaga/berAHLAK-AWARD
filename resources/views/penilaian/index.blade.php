@@ -4,9 +4,9 @@
 
 @section('content')
 
-<!-- Custom CSS Biasa -->
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700&display=swap');
+
     :root {
         --primary-color: #2563eb;
         --primary-hover: #1d4ed8;
@@ -30,7 +30,6 @@
         color: var(--text-main);
     }
 
-    /* Topbar */
     .penilaian-topbar {
         display: flex;
         justify-content: space-between;
@@ -71,9 +70,9 @@
     .btn-tambah:hover {
         background-color: var(--primary-hover);
         transform: translateY(-1px);
+        color: white;
     }
 
-    /* Alert Success */
     .alert-success {
         background-color: var(--success-bg);
         color: var(--success-text);
@@ -85,11 +84,22 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
-    /* Card & Table Wrapper */
+    .alert-error {
+        background-color: #fee2e2;
+        color: #991b1b;
+        padding: 14px 18px;
+        border-radius: var(--radius);
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+        border-left: 5px solid #ef4444;
+    }
+
     .penilaian-card {
         background: var(--card-bg);
         border-radius: var(--radius);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        box-shadow:
+            0 4px 6px -1px rgba(0, 0, 0, 0.05),
+            0 2px 4px -1px rgba(0, 0, 0, 0.03);
         overflow: hidden;
         border: 1px solid var(--border-color);
     }
@@ -132,7 +142,6 @@
         background-color: #f8fafc;
     }
 
-    /* Badge Status */
     .badge-status {
         display: inline-block;
         padding: 4px 10px;
@@ -141,20 +150,27 @@
         font-weight: 600;
         text-transform: capitalize;
     }
-    .badge-status.lulus, .badge-status.baik, .badge-status.aktif {
+
+    .badge-status.lulus,
+    .badge-status.baik,
+    .badge-status.aktif {
         background-color: #dcfce7;
         color: #166534;
     }
-    .badge-status.pending, .badge-status.cukup {
+
+    .badge-status.pending,
+    .badge-status.cukup {
         background-color: #fef9c3;
         color: #854d0e;
     }
-    .badge-status.tidak, .badge-status.kurang, .badge-status.gagal {
+
+    .badge-status.tidak,
+    .badge-status.kurang,
+    .badge-status.gagal {
         background-color: #fee2e2;
         color: #991b1b;
     }
 
-    /* Action Buttons */
     .action-group {
         display: flex;
         gap: 8px;
@@ -174,6 +190,7 @@
 
     .btn-action-edit:hover {
         background-color: #dbeafe;
+        color: var(--primary-hover);
     }
 
     .btn-action-delete {
@@ -195,89 +212,224 @@
 
     .empty-state {
         text-align: center;
-        padding: 3rem 1rem;
+        padding: 3rem 1rem !important;
         color: var(--text-muted);
         font-style: italic;
+    }
+
+    .periode-info {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 0.82rem;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .penilaian-container {
+            padding: 1rem;
+        }
+
+        .penilaian-topbar {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .btn-tambah {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .action-group {
+            flex-direction: column;
+            align-items: stretch;
+        }
     }
 </style>
 
 <div class="penilaian-container">
 
     <div class="penilaian-topbar">
+
         <div>
             <h1>Data Penilaian</h1>
-            <p>Kelola data penilaian kinerja dengan mudah dan terstruktur</p>
+
+            <p>
+                Data penilaian BerAKHLAK yang telah dibuat oleh admin.
+            </p>
+
+            @if(isset($periode) && $periode)
+                <span class="periode-info">
+                    Periode Aktif: {{ $periode }}
+                </span>
+            @endif
         </div>
 
+        {{-- HANYA ADMIN YANG BISA MEMBUAT PENILAIAN --}}
         @if(auth()->user()->role === 'admin')
             <a href="{{ route('penilaian.create') }}" class="btn-tambah">
                 + Tambah Penilaian
             </a>
         @endif
+
     </div>
 
+
+    {{-- SUCCESS --}}
     @if(session('success'))
         <div class="alert-success">
             {{ session('success') }}
         </div>
     @endif
 
+
+    {{-- ERROR --}}
+    @if(session('error'))
+        <div class="alert-error">
+            {{ session('error') }}
+        </div>
+    @endif
+
+
+    {{-- VALIDATION ERROR --}}
+    @if($errors->any())
+        <div class="alert-error">
+            <strong>Terjadi kesalahan:</strong>
+
+            <ul style="margin: 8px 0 0 20px;">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+
     <div class="penilaian-card">
+
         <div class="table-responsive">
+
             <table class="custom-table">
+
                 <thead>
                     <tr>
                         <th width="5%">No</th>
-                        <th width="25%">Nama</th>
-                        <th width="25%">Jabatan</th>
-                        <th width="15%">Nilai</th>
+                        <th width="20%">Periode</th>
+                        <th width="25%">Pengisi</th>
+                        <th width="20%">Tanggal</th>
                         <th width="15%">Status</th>
+
+                        {{-- AKSI HANYA ADMIN --}}
                         @if(auth()->user()->role === 'admin')
                             <th width="15%">Aksi</th>
                         @endif
                     </tr>
                 </thead>
+
                 <tbody>
+
                     @forelse($penilaian as $item)
+
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td><strong>{{ $item->nama }}</strong></td>
-                            <td>{{ $item->jabatan }}</td>
-                            <td>{{ $item->nilai }}</td>
+
                             <td>
-                                <!-- Otomatis menyesuaikan warna badge berdasarkan isi teks status -->
-                                <span class="badge-status {{ strtolower($item->status) }}">
-                                    {{ ucfirst($item->status) }}
-                                </span>
+                                {{ $loop->iteration }}
                             </td>
+
+                            <td>
+                                <strong>
+                                    {{ $item->periode ?? '-' }}
+                                </strong>
+                            </td>
+
+                            <td>
+                                {{ $item->nip_pengisi ?? '-' }}
+                            </td>
+
+                            <td>
+                                @if($item->timestamp)
+                                    {{ \Carbon\Carbon::parse($item->timestamp)->format('d/m/Y H:i') }}
+                                @else
+                                    -
+                                @endif
+                            </td>
+
+                            <td>
+
+                                <span class="badge-status aktif">
+                                    Tersimpan
+                                </span>
+
+                            </td>
+
+
+                            {{-- AKSI ADMIN --}}
                             @if(auth()->user()->role === 'admin')
+
                                 <td>
+
                                     <div class="action-group">
-                                        <a href="{{ route('penilaian.edit', $item) }}" class="btn-action-edit">
+
+                                        <a
+                                            href="{{ route('penilaian.edit', $item) }}"
+                                            class="btn-action-edit"
+                                        >
                                             Edit
                                         </a>
 
-                                        <form action="{{ route('penilaian.destroy', $item) }}" method="POST" style="display:inline">
+
+                                        <form
+                                            action="{{ route('penilaian.destroy', $item) }}"
+                                            method="POST"
+                                            style="display:inline"
+                                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')"
+                                        >
+
                                             @csrf
+
                                             @method('DELETE')
-                                            <button type="submit" class="btn-action-delete" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+
+                                            <button
+                                                type="submit"
+                                                class="btn-action-delete"
+                                            >
                                                 Hapus
                                             </button>
+
                                         </form>
+
                                     </div>
+
                                 </td>
+
                             @endif
+
                         </tr>
+
                     @empty
+
                         <tr>
-                            <td colspan="6" class="empty-state">
+
+                            <td
+                                colspan="{{ auth()->user()->role === 'admin' ? 6 : 5 }}"
+                                class="empty-state"
+                            >
                                 Belum ada data penilaian yang tersedia.
                             </td>
+
                         </tr>
+
                     @endforelse
+
                 </tbody>
+
             </table>
+
         </div>
+
     </div>
 
 </div>
