@@ -20,7 +20,7 @@
         --card-bg: #ffffff;
         --text-main: #1e293b;
         --text-muted: #64748b;
-        --radius: 12px;
+        --radius: 20px;
     }
 
     .custom-page-container {
