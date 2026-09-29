@@ -14,22 +14,25 @@ class AuthController extends Controller
      */
     public function showLogin()
     {
-        return view('auth.login'); // Disesuaikan karena berada di folder auth/
+        return view('auth.login');
     }
 
     /**
-     * Proses login
+     * Proses login menggunakan username
      */
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => [
+            'username' => [
                 'required',
-                'email',
+                'string',
             ],
             'password' => [
                 'required',
             ],
+        ], [
+            'username.required' => 'Username wajib diisi.',
+            'password.required' => 'Password wajib diisi.',
         ]);
 
         if (Auth::attempt($credentials)) {
@@ -37,9 +40,10 @@ class AuthController extends Controller
             // Regenerasi session setelah login
             $request->session()->regenerate();
 
-            // Redirect berdasarkan role
+            // Ambil user yang sedang login
             $user = Auth::user();
 
+            // Redirect berdasarkan role
             if ($user->role === 'admin') {
                 return redirect()->route('dashboard');
             }
@@ -53,9 +57,9 @@ class AuthController extends Controller
 
         return back()
             ->withErrors([
-                'email' => 'Email atau password yang dimasukkan tidak sesuai.',
+                'username' => 'Username atau password yang dimasukkan tidak sesuai.',
             ])
-            ->withInput($request->only('email'));
+            ->withInput($request->only('username'));
     }
 
     /**
@@ -63,7 +67,7 @@ class AuthController extends Controller
      */
     public function showRegister()
     {
-        return view('auth.register'); // Disesuaikan karena berada di folder auth/
+        return view('auth.register');
     }
 
     /**

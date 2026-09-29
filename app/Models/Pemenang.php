@@ -7,6 +7,7 @@ use MongoDB\Laravel\Eloquent\Model;
 class Pemenang extends Model
 {
     protected $connection = 'mongodb';
+
     protected $collection = 'pemenangs';
 
     protected $fillable = [
@@ -15,6 +16,7 @@ class Pemenang extends Model
         'nip',
         'nama',
         'rank',
+        'nosertifikat',
     ];
 
     protected $casts = [

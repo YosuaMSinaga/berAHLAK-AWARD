@@ -8,19 +8,45 @@ use Illuminate\Http\Request;
 class SettingController extends Controller
 {
     /**
-     * Menyimpan periode penilaian baru
+     * Menampilkan halaman Pengaturan Periode Penilaian.
+     */
+    public function index()
+    {
+        // Mengambil setting yang sedang aktif
+        $settings = Setting::where('status', 'aktif')
+            ->orderBy('value', 'asc')
+            ->get();
+
+        // Mengambil seluruh riwayat setting
+        $riwayatSettings = Setting::orderBy('periode', 'desc')
+            ->orderBy('value', 'asc')
+            ->get();
+
+        return view('pengaturan.app', [
+            'settings' => $settings,
+            'riwayatSettings' => $riwayatSettings,
+        ]);
+    }
+
+    /**
+     * Menyimpan pengaturan baru.
+     *
+     * 1 kali submit form = 1 data Setting.
      */
     public function store(Request $request)
     {
+        // Validasi data dari form
         $validated = $request->validate([
             'periode' => [
                 'required',
                 'string',
+                'max:20',
             ],
 
             'value' => [
                 'required',
                 'string',
+                'max:100',
             ],
 
             'jum_pilihan' => [
@@ -42,95 +68,109 @@ class SettingController extends Controller
             ],
         ]);
 
-
         /*
         |--------------------------------------------------------------------------
-        | Nonaktifkan periode aktif sebelumnya
+        | Nonaktifkan setting yang sebelumnya aktif
         |--------------------------------------------------------------------------
+        |
+        | Jika membuat setting baru, setting aktif sebelumnya
+        | akan menjadi tidak aktif.
+        |
         */
-
         Setting::where('status', 'aktif')
             ->update([
                 'status' => 'tidak aktif',
             ]);
 
-
         /*
         |--------------------------------------------------------------------------
-        | Simpan periode baru
+        | Simpan SATU data sesuai isi form
         |--------------------------------------------------------------------------
+        |
+        | Tidak ada foreach.
+        | Tidak membuat 7 Core Value secara otomatis.
+        |
         */
-
         Setting::create([
             'periode' => $validated['periode'],
             'value' => $validated['value'],
             'jum_pilihan' => (int) $validated['jum_pilihan'],
             'max_pilihan' => (int) $validated['max_pilihan'],
             'kuota_pemenang' => (int) $validated['kuota_pemenang'],
+
             'status' => 'aktif',
+
+            // Nilai awal perhitungan
+            'avgberakhlak' => 0,
+            'avgpeer' => 0,
+            'avgakhir' => 0,
+            'korelasi' => 0,
         ]);
 
-
+        /*
+        |--------------------------------------------------------------------------
+        | Kembali ke halaman pengaturan
+        |--------------------------------------------------------------------------
+        */
         return redirect()
-            ->back()
+            ->route('pengaturan.app')
             ->with(
                 'success',
-                'Periode penilaian berhasil dibuat dan sekarang aktif.'
+                'Parameter pengaturan berhasil disimpan.'
             );
     }
 
-
     /**
-     * Mengaktifkan periode tertentu
+     * Mengaktifkan kembali setting tertentu.
      */
     public function aktifkan($id)
     {
+        // Cari data berdasarkan ID
+        $setting = Setting::find($id);
+
+        // Jika data tidak ditemukan
+        if (!$setting) {
+            return redirect()
+                ->route('pengaturan.app')
+                ->with(
+                    'error',
+                    'Data pengaturan tidak ditemukan.'
+                );
+        }
+
         /*
         |--------------------------------------------------------------------------
-        | Nonaktifkan semua periode
+        | Nonaktifkan semua setting yang sedang aktif
         |--------------------------------------------------------------------------
         */
-
         Setting::where('status', 'aktif')
             ->update([
                 'status' => 'tidak aktif',
             ]);
 
-
         /*
         |--------------------------------------------------------------------------
-        | Cari periode
+        | Aktifkan setting yang dipilih
         |--------------------------------------------------------------------------
         */
-
-        $setting = Setting::find($id);
-
-        if (!$setting) {
-            return redirect()
-                ->back()
-                ->with(
-                    'error',
-                    'Data periode penilaian tidak ditemukan.'
-                );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Aktifkan periode
-        |--------------------------------------------------------------------------
-        */
-
         $setting->update([
             'status' => 'aktif',
         ]);
 
-
+        /*
+        |--------------------------------------------------------------------------
+        | Kembali ke halaman pengaturan
+        |--------------------------------------------------------------------------
+        */
         return redirect()
-            ->back()
+            ->route('pengaturan.app')
             ->with(
                 'success',
-                'Periode penilaian berhasil diaktifkan.'
+                'Pengaturan "' .
+                $setting->value .
+                '" pada periode ' .
+                $setting->periode .
+                ' berhasil diaktifkan.'
             );
     }
 }

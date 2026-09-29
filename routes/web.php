@@ -1,33 +1,50 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PenilaianController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\PemenangController;
 
 use App\Models\Penilaian;
 
 
 /*
 |--------------------------------------------------------------------------
-| LOGIN & REGISTER
+| HALAMAN AWAL
 |--------------------------------------------------------------------------
 */
 
 Route::get('/', function () {
+
     return redirect()->route('login');
+
 });
 
 
+/*
+|--------------------------------------------------------------------------
+| GUEST
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware('guest')->group(function () {
 
-    // Login
+    /*
+    |--------------------------------------------------------------------------
+    | LOGIN
+    |--------------------------------------------------------------------------
+    */
+
     Route::get('/login', [
         AuthController::class,
         'showLogin'
     ])->name('login');
+
 
     Route::post('/login', [
         AuthController::class,
@@ -35,16 +52,23 @@ Route::middleware('guest')->group(function () {
     ])->name('login.process');
 
 
-    // Register
+    /*
+    |--------------------------------------------------------------------------
+    | REGISTER
+    |--------------------------------------------------------------------------
+    */
+
     Route::get('/register', [
         AuthController::class,
         'showRegister'
     ])->name('register');
 
+
     Route::post('/register', [
         AuthController::class,
         'register'
     ])->name('register.process');
+
 });
 
 
@@ -54,15 +78,27 @@ Route::middleware('guest')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::post('/logout', [
-    AuthController::class,
-    'logout'
-])->middleware('auth')->name('logout');
+Route::post('/logout', function (Request $request) {
+
+    Auth::logout();
+
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect()
+        ->route('login')
+        ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+        ->header('Pragma', 'no-cache')
+        ->header('Expires', '0');
+
+})
+    ->middleware('auth')
+    ->name('logout');
 
 
 /*
 |--------------------------------------------------------------------------
-| AUTHENTICATED USER
+| AUTHENTICATED
 |--------------------------------------------------------------------------
 */
 
@@ -76,7 +112,6 @@ Route::middleware('auth')->group(function () {
     */
 
     Route::middleware('role:admin')->group(function () {
-
 
         /*
         |--------------------------------------------------------------------------
@@ -92,72 +127,52 @@ Route::middleware('auth')->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | PENILAIAN ADMIN
+        | PENILAIAN
         |--------------------------------------------------------------------------
-        |
-        | Admin dapat:
-        | - Melihat daftar penilaian
-        | - Membuat penilaian
-        | - Menyimpan penilaian
-        | - Melihat detail
-        | - Mengedit
-        | - Mengupdate
-        | - Menghapus
-        |
         */
 
-
-        // Daftar penilaian
         Route::get('/penilaian', [
             PenilaianController::class,
             'index'
         ])->name('penilaian.index');
 
 
-        // Form tambah penilaian
-        // HARUS berada sebelum /penilaian/{penilaian}
         Route::get('/penilaian/create', [
             PenilaianController::class,
             'create'
         ])->name('penilaian.create');
 
 
-        // Simpan penilaian
         Route::post('/penilaian', [
             PenilaianController::class,
             'store'
         ])->name('penilaian.store');
 
 
-        // Detail penilaian
         Route::get('/penilaian/{penilaian}', [
             PenilaianController::class,
             'show'
         ])->name('penilaian.show');
 
 
-        // Form edit penilaian
         Route::get('/penilaian/{penilaian}/edit', [
             PenilaianController::class,
             'edit'
         ])->name('penilaian.edit');
 
 
-        // Update penilaian
         Route::put('/penilaian/{penilaian}', [
             PenilaianController::class,
             'update'
         ])->name('penilaian.update');
 
 
-        // Update penilaian menggunakan PATCH
         Route::patch('/penilaian/{penilaian}', [
             PenilaianController::class,
             'update'
         ])->name('penilaian.update.patch');
 
 
-        // Hapus penilaian
         Route::delete('/penilaian/{penilaian}', [
             PenilaianController::class,
             'destroy'
@@ -166,24 +181,22 @@ Route::middleware('auth')->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | PENGATURAN PERIODE
+        | PENGATURAN APLIKASI
         |--------------------------------------------------------------------------
-        |
-        | Route ini digunakan oleh form.blade.php:
-        |
-        | <form action="{{ route('setting.store') }}" method="POST">
-        |
         */
 
+        Route::get('/pengaturan-aplikasi', [
+            SettingController::class,
+            'index'
+        ])->name('pengaturan.app');
 
-        // Simpan / buat periode penilaian baru
+
         Route::post('/setting', [
             SettingController::class,
             'store'
         ])->name('setting.store');
 
 
-        // Aktifkan periode tertentu
         Route::patch('/setting/{id}/aktifkan', [
             SettingController::class,
             'aktifkan'
@@ -192,27 +205,51 @@ Route::middleware('auth')->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | FITUR ADMIN
+        | PEMENANG & SERTIFIKAT
         |--------------------------------------------------------------------------
         */
 
+        Route::get('/pemenang-sertifikat', [
+            PemenangController::class,
+            'index'
+        ])->name('pemenang.sertifikat');
 
-        // Pemenang & Sertifikat
-        Route::get('/pemenang-sertifikat', function () {
-            return view('pemenang.sertifikat');
-        })->name('pemenang.sertifikat');
+
+        Route::get('/pemenang/periode-aktif', [
+            PemenangController::class,
+            'periodeAktif'
+        ])->name('pemenang.periode-aktif');
 
 
-        // Pengolahan Data
+        Route::get('/pemenang/riwayat', [
+            PemenangController::class,
+            'riwayat'
+        ])->name('pemenang.riwayat');
+
+
+        Route::post('/pemenang/tetapkan', [
+            PemenangController::class,
+            'tetapkan'
+        ])->name('pemenang.tetapkan');
+
+
+        Route::post('/pemenang/update-nosertifikat', [
+            PemenangController::class,
+            'updateNoSertifikat'
+        ])->name('pemenang.update-nosert');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PENGOLAHAN DATA
+        |--------------------------------------------------------------------------
+        */
+
         Route::get('/pengolahan-data', function () {
+
             return view('pengolahan.data');
+
         })->name('pengolahan.data');
-
-
-        // Pengaturan Aplikasi
-        Route::get('/pengaturan-aplikasi', function () {
-            return view('pengaturan.app');
-        })->name('pengaturan.app');
 
     });
 
@@ -225,7 +262,6 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:user')->group(function () {
 
-
         /*
         |--------------------------------------------------------------------------
         | DASHBOARD USER
@@ -237,7 +273,7 @@ Route::middleware('auth')->group(function () {
             $totalPenilaian = Penilaian::count();
 
             return view(
-                'dashboard.userpage.user',
+                'dashboard.user',
                 compact('totalPenilaian')
             );
 
@@ -246,27 +282,110 @@ Route::middleware('auth')->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | USER HANYA MELIHAT PENILAIAN
+        | PROFIL USER
         |--------------------------------------------------------------------------
-        |
-        | User TIDAK mempunyai akses:
-        | - create
-        | - store
-        | - edit
-        | - update
-        | - destroy
-        |
         */
 
+        Route::get('/user/profil', function () {
 
-        // Daftar penilaian
+            return view(
+                'dashboard.userpage.profil'
+            );
+
+        })->name('profil');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPDATE PROFIL USER
+        |--------------------------------------------------------------------------
+        */
+
+        Route::put('/user/profil', function (Request $request) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | AMBIL USER YANG SEDANG LOGIN
+            |--------------------------------------------------------------------------
+            */
+
+            $user = Auth::user();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CEK USER
+            |--------------------------------------------------------------------------
+            */
+
+            if (!$user) {
+
+                return redirect()
+                    ->route('login')
+                    ->with(
+                        'error',
+                        'Sesi pengguna tidak ditemukan.'
+                    );
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDASI
+            |--------------------------------------------------------------------------
+            */
+
+            $validated = $request->validate([
+
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
+
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE NAMA USER
+            |--------------------------------------------------------------------------
+            */
+
+            $user->name = $validated['name'];
+
+            $user->save();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | KEMBALI KE HALAMAN PROFIL
+            |--------------------------------------------------------------------------
+            */
+
+            return redirect()
+                ->route('profil')
+                ->with(
+                    'success',
+                    'Profil berhasil diperbarui.'
+                );
+
+        })->name('profil.update');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PENILAIAN USER
+        |--------------------------------------------------------------------------
+        */
+
         Route::get('/user/penilaian', [
             PenilaianController::class,
             'index'
         ])->name('user.penilaian');
 
 
-        // Detail penilaian
         Route::get('/user/penilaian/{penilaian}', [
             PenilaianController::class,
             'show'
@@ -283,8 +402,12 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:viewer')->group(function () {
 
+        /*
+        |--------------------------------------------------------------------------
+        | PENILAIAN VIEWER
+        |--------------------------------------------------------------------------
+        */
 
-        // Viewer hanya dapat melihat daftar penilaian
         Route::get('/viewer/penilaian', [
             PenilaianController::class,
             'index'

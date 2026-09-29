@@ -24,13 +24,14 @@
             <h1 class="login-heading">
                 Selamat Datang di BerAKHLAK Award
             </h1>
+
             <p class="login-subtext">
                 Sistem penilaian terintegrasi untuk mewujudkan pelayanan
                 yang profesional, akuntabel, dan berintegritas tinggi.
             </p>
         </div>
 
-        {{-- Card Login (Lebih Kompak/Kecil) --}}
+        {{-- Card Login --}}
         <div class="login-card">
 
             {{-- Logo --}}
@@ -55,15 +56,26 @@
             {{-- Judul --}}
             <div class="login-card-header">
                 <h2>Masuk Akun</h2>
-                <p>Silakan masukkan email dan password Anda</p>
+                <p>Silakan masukkan username dan password Anda</p>
             </div>
 
             {{-- Error Session --}}
             @if(session('error'))
                 <div class="alert-error-session">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        />
                     </svg>
+
                     <span>{{ session('error') }}</span>
                 </div>
             @endif
@@ -71,38 +83,69 @@
             {{-- Success Session --}}
             @if(session('success'))
                 <div class="alert-success-session">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M5 13l4 4L19 7"
+                        />
                     </svg>
+
                     <span>{{ session('success') }}</span>
                 </div>
             @endif
 
             {{-- Form Login --}}
-            <form action="{{ route('login.process') }}" method="POST" class="login-form">
+            <form
+                action="{{ route('login.process') }}"
+                method="POST"
+                class="login-form"
+            >
                 @csrf
 
-                {{-- Email --}}
+                {{-- Username --}}
                 <div class="form-group">
-                    <label class="form-label">Email</label>
+
+                    <label class="form-label">
+                        Username
+                    </label>
+
                     <input
-                        type="email"
-                        name="email"
-                        value="{{ old('email') }}"
+                        type="text"
+                        name="username"
+                        value="{{ old('username') }}"
                         required
-                        autocomplete="email"
-                        placeholder="Masukkan Email Anda"
-                        class="form-input @error('email') is-invalid @enderror"
+                        autocomplete="username"
+                        placeholder="Masukkan Username Anda"
+                        class="form-input @error('username') is-invalid @enderror"
                     >
-                    @error('email')
-                        <span class="form-error-text">{{ $message }}</span>
+
+                    @error('username')
+                        <span class="form-error-text">
+                            {{ $message }}
+                        </span>
                     @enderror
+
                 </div>
 
                 {{-- Password --}}
-                <div class="form-group" x-data="{ showPassword: false }">
-                    <label class="form-label">Password</label>
+                <div
+                    class="form-group"
+                    x-data="{ showPassword: false }"
+                >
+
+                    <label class="form-label">
+                        Password
+                    </label>
+
                     <div class="password-wrapper">
+
                         <input
                             :type="showPassword ? 'text' : 'password'"
                             name="password"
@@ -111,36 +154,91 @@
                             placeholder="••••••••"
                             class="form-input @error('password') is-invalid @enderror"
                         >
+
                         <button
                             type="button"
                             @click="showPassword = !showPassword"
                             class="password-toggle-btn"
-                            aria-label="Tampilkan password"
+                            :aria-label="showPassword ? 'Sembunyikan password' : 'Tampilkan password'"
                         >
-                            <svg x-show="!showPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+
+                            <svg
+                                x-show="!showPassword"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                />
+
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                />
                             </svg>
-                            <svg x-show="showPassword" x-cloak xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.878 9.878a3 3 0 104.243 4.243"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18"/>
+
+                            <svg
+                                x-show="showPassword"
+                                x-cloak
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029"
+                                />
+
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M9.878 9.878a3 3 0 104.243 4.243"
+                                />
+
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M3 3l18 18"
+                                />
                             </svg>
+
                         </button>
+
                     </div>
+
                     @error('password')
-                        <span class="form-error-text">{{ $message }}</span>
+                        <span class="form-error-text">
+                            {{ $message }}
+                        </span>
                     @enderror
+
                 </div>
 
                 {{-- Tombol Login --}}
-                <button type="submit" class="btn-submit">Masuk</button>
+                <button
+                    type="submit"
+                    class="btn-submit"
+                >
+                    Masuk
+                </button>
+
             </form>
 
             {{-- Link Register --}}
             <div class="register-link">
                 <span>Belum memiliki akun?</span>
-                <a href="{{ route('register') }}">Daftar di sini</a>
+                <a href="{{ route('register') }}">
+                    Daftar di sini
+                </a>
             </div>
 
             {{-- Footer --}}
@@ -149,16 +247,17 @@
             </p>
 
         </div>
-
     </div>
 
 </div>
 
 <style>
-    [x-cloak] { display: none !important; }
+    [x-cloak] {
+        display: none !important;
+    }
 
     .login-wrapper {
-        flex: 1; /* Mengisi penuh ruang antara header dan footer */
+        flex: 1;
         width: 100%;
         display: flex;
         align-items: center;
@@ -197,7 +296,9 @@
     }
 
     @media (min-width: 1024px) {
-        .login-container { flex-direction: row; }
+        .login-container {
+            flex-direction: row;
+        }
     }
 
     .login-left-content {
@@ -225,7 +326,9 @@
     }
 
     @media (min-width: 1024px) {
-        .login-heading { font-size: 2.75rem; }
+        .login-heading {
+            font-size: 2.75rem;
+        }
     }
 
     .login-subtext {
@@ -375,15 +478,26 @@
 
     .password-toggle-btn {
         position: absolute;
-        top: 0; right: 0; bottom: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
         padding-right: 0.6rem;
-        background: none; border: none; cursor: pointer;
-        display: flex; align-items: center;
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
         color: #94a3b8;
     }
 
-    .password-toggle-btn:hover { color: #475569; }
-    .password-toggle-btn svg { width: 1rem; height: 1rem; }
+    .password-toggle-btn:hover {
+        color: #475569;
+    }
+
+    .password-toggle-btn svg {
+        width: 1rem;
+        height: 1rem;
+    }
 
     .btn-submit {
         width: 100%;
@@ -400,7 +514,9 @@
         margin-top: 0.2rem;
     }
 
-    .btn-submit:hover { background-color: #4338ca; }
+    .btn-submit:hover {
+        background-color: #4338ca;
+    }
 
     .register-link {
         text-align: center;
@@ -416,7 +532,9 @@
         margin-left: 0.2rem;
     }
 
-    .register-link a:hover { text-decoration: underline; }
+    .register-link a:hover {
+        text-decoration: underline;
+    }
 
     .login-card-footer {
         text-align: center;

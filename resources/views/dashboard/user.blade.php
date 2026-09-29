@@ -9,9 +9,6 @@
     <div class="dash-header-flex">
         <div class="dash-title-group">
             <h2>Dashboard User</h2>
-            <p class="text-muted mb-0">
-                Selamat datang, <span class="fw-semibold text-success">{{ auth()->user()->name ?? 'User' }}</span>
-            </p>
         </div>
         <div class="dash-nav-container">
             <ul id="dashboardTabs" role="tablist" class="custom-tab-list">

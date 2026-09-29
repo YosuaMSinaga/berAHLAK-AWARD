@@ -7,6 +7,7 @@ use MongoDB\Laravel\Eloquent\Model;
 class Penilaian extends Model
 {
     protected $connection = 'mongodb';
+
     protected $collection = 'penilaians';
 
     protected $fillable = [
@@ -23,3 +24,4 @@ class Penilaian extends Model
         'pilihan_pegawai' => 'array',
     ];
 }
+
