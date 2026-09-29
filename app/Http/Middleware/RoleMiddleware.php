@@ -18,15 +18,38 @@ class RoleMiddleware
             return redirect()->route('login');
         }
 
-        // Menggabungkan dan memecah role jika menggunakan pemisah koma (,) atau pipa (|)
+
+        /*
+         * Mendukung:
+         * role:admin
+         * role:admin,user
+         * role:admin|user
+         */
         $allowedRoles = [];
+
         foreach ($roles as $role) {
-            $allowedRoles = array_merge($allowedRoles, preg_split('/[,|]/', $role));
+
+            $splitRoles = preg_split(
+                '/[,|]+/',
+                $role,
+                -1,
+                PREG_SPLIT_NO_EMPTY
+            );
+
+            $allowedRoles = array_merge(
+                $allowedRoles,
+                $splitRoles
+            );
         }
 
-        if (!in_array(auth()->user()->role, $allowedRoles)) {
+
+        $userRole = auth()->user()->role;
+
+
+        if (!in_array($userRole, $allowedRoles, true)) {
             abort(403, 'Anda tidak memiliki akses.');
         }
+
 
         return $next($request);
     }
