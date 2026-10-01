@@ -58,13 +58,7 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | LOGOUT
-    |--------------------------------------------------------------------------
-    */
-
+    // LOGOUT
     Route::post('/logout', function (Request $request) {
 
         Auth::logout();
@@ -81,22 +75,11 @@ Route::middleware('auth')->group(function () {
     })->name('logout');
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | DASHBOARD UTAMA
-    |--------------------------------------------------------------------------
-    | Dashboard diarahkan sesuai role melalui DashboardController.
-    */
-
+    // DASHBOARD UTAMA (diarahkan sesuai role lewat DashboardController)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | DASHBOARD - DATA PERIODE
-    |--------------------------------------------------------------------------
-    */
-
+    // DASHBOARD - DATA PERIODE
     Route::get('/dashboard/periode', [
         DashboardController::class,
         'getPeriode'
@@ -108,36 +91,20 @@ Route::middleware('auth')->group(function () {
     ])->name('dashboard.data');
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | DASHBOARD - LAPORAN KOMPETENSI PERILAKU PRIBADI  (BARU)
-    |--------------------------------------------------------------------------
-    | Berada di grup auth (bukan role:*) agar bisa dipanggil admin, user,
-    | dan viewer. Data dibatasi lewat NIP user yang sedang login.
-    */
-
+    // DASHBOARD - LAPORAN KOMPETENSI PERILAKU PRIBADI
+    // Di grup auth (bukan role:*) agar bisa dipanggil admin, user, dan viewer.
     Route::get('/dashboard/laporan-pribadi', [
         DashboardController::class,
         'getLaporanPribadi'
     ])->name('dashboard.laporan-pribadi');
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | PROFIL
-    |--------------------------------------------------------------------------
-    */
-
+    // PROFIL
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil');
     Route::put('/profil', [ProfilController::class, 'update'])->name('profil.update');
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | FORM PENILAIAN UMUM
-    |--------------------------------------------------------------------------
-    */
-
+    // FORM PENILAIAN UMUM
     Route::get('/penilaian', [PenilaianController::class, 'index'])->name('penilaian.index');
     Route::get('/penilaian/create', [PenilaianController::class, 'create'])->name('penilaian.create');
     Route::get('/penilaian/form/{setting}', [PenilaianController::class, 'form'])->name('penilaian.form');
@@ -225,18 +192,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/penilaian', [PenilaianController::class, 'store'])->name('admin.penilaian.store');
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | PENGOLAHAN DATA
-        |--------------------------------------------------------------------------
-        */
-
+        // PENGOLAHAN DATA
         Route::get('/pengolahan-data', function () {
 
-            // Periode aktif
-            $settingPeriode = Setting::where('key', 'periode')->first();
+            // Periode aktif (berdasarkan status 'aktif' di collection settings)
+            $settingPeriode = Setting::where('status', 'aktif')->first();
 
-            $periodeAktif = $settingPeriode->value ?? '2026 06';
+            $periodeAktif = $settingPeriode->periode ?? '2026 06';
 
             // Data olah berdasarkan periode
             $dataOlah = Olah::where('periode', $periodeAktif)
@@ -256,32 +218,23 @@ Route::middleware('auth')->group(function () {
 
             return view('dashboard.page.Olah', [
                 'periodeAktif' => $periodeAktif,
-                'dataOlah' => $dataOlah,
-                'jumlahData' => $jumlahData,
-                'rerataSelf' => $rerataSelf,
-                'rerataPeer' => $rerataPeer,
-                'rerataAkhir' => $rerataAkhir,
+                'dataOlah'     => $dataOlah,
+                'jumlahData'   => $jumlahData,
+                'rerataSelf'   => $rerataSelf,
+                'rerataPeer'   => $rerataPeer,
+                'rerataAkhir'  => $rerataAkhir,
             ]);
 
         })->name('pengolahan.data');
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | PENGATURAN APLIKASI
-        |--------------------------------------------------------------------------
-        */
-
+        // PENGATURAN APLIKASI
         Route::get('/pengaturan-aplikasi', [PengaturanController::class, 'index'])->name('pengaturan.app');
-        Route::put('/pengaturan-aplikasi', [PengaturanController::class, 'update'])->name('pengaturan.app.update');
+        Route::post('/pengaturan-aplikasi', [PengaturanController::class, 'store'])->name('setting.store');
+        Route::patch('/pengaturan-aplikasi/{id}/aktifkan', [PengaturanController::class, 'aktifkan'])->name('setting.aktifkan');
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | PEMENANG & SERTIFIKAT
-        |--------------------------------------------------------------------------
-        */
-
+        // PEMENANG & SERTIFIKAT
         Route::get('/pemenang-sertifikat', [PemenangController::class, 'index'])->name('pemenang.sertifikat');
         Route::get('/pemenang/periode-aktif', [PemenangController::class, 'periodeAktif'])->name('pemenang.periode-aktif');
         Route::get('/pemenang/riwayat', [PemenangController::class, 'riwayat'])->name('pemenang.riwayat');

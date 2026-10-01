@@ -21,17 +21,16 @@ class Setting extends Model
         'avgpeer',
         'avgakhir',
         'korelasi',
-    
     ];
 
     protected $casts = [
         'jum_pilihan' => 'integer',
         'max_pilihan' => 'integer',
-        'pemenang' => 'array',
+        'pemenang'    => 'integer',
 
         'avgberakhlak' => 'float',
-        'avgpeer' => 'float',
-        'avgakhir' => 'float',
-        'korelasi' => 'float',
+        'avgpeer'      => 'float',
+        'avgakhir'     => 'float',
+        'korelasi'     => 'float',
     ];
 }
