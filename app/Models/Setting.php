@@ -15,18 +15,19 @@ class Setting extends Model
         'value',
         'jum_pilihan',
         'max_pilihan',
-        'kuota_pemenang',
+        'pemenang',
         'status',
         'avgberakhlak',
         'avgpeer',
         'avgakhir',
         'korelasi',
+    
     ];
 
     protected $casts = [
         'jum_pilihan' => 'integer',
         'max_pilihan' => 'integer',
-        'kuota_pemenang' => 'integer',
+        'pemenang' => 'array',
 
         'avgberakhlak' => 'float',
         'avgpeer' => 'float',

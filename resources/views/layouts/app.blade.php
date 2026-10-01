@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-
 <html lang="id">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -14,27 +13,72 @@
     <title>@yield('title', 'Sistem Penilaian')</title>
 
     {{-- Alpine.js --}}
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script
+        defer
+        src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js">
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+
+            /*
+            |--------------------------------------------------------------------------
+            | MENCEGAH KEMBALI KE HALAMAN LOGIN DENGAN TOMBOL BACK
+            |--------------------------------------------------------------------------
+            */
+
             if (window.history && window.history.pushState) {
-                window.history.pushState(null, '', window.location.href);
+
+                window.history.pushState(
+                    null,
+                    '',
+                    window.location.href
+                );
 
                 window.addEventListener('popstate', function () {
-                    window.history.pushState(null, '', window.location.href);
+
+                    window.history.pushState(
+                        null,
+                        '',
+                        window.location.href
+                    );
+
                 });
             }
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | RELOAD KETIKA HALAMAN DIAMBIL DARI BFCACHE
+            |--------------------------------------------------------------------------
+            */
+
             window.addEventListener('pageshow', function (event) {
-                if (event.persisted || (window.performance && window.performance.navigation && window.performance.navigation.type === 2)) {
+
+                if (
+                    event.persisted ||
+                    (
+                        window.performance &&
+                        window.performance.navigation &&
+                        window.performance.navigation.type === 2
+                    )
+                ) {
                     window.location.reload();
                 }
+
             });
+
         });
     </script>
 
+
     <style>
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESET
+        |--------------------------------------------------------------------------
+        */
 
         * {
             box-sizing: border-box;
@@ -42,110 +86,193 @@
             padding: 0;
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | HTML & BODY
+        |--------------------------------------------------------------------------
+        */
+
         html,
         body {
             height: 100%;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont,
-                "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family:
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Oxygen,
+                Ubuntu,
+                Cantarell,
+                sans-serif;
+
             background-color: #f8fafc;
             color: #1e293b;
+
             overflow-x: hidden;
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | PAGE WRAPPER
+        |--------------------------------------------------------------------------
+        */
+
         .page-wrapper {
             min-height: 100vh;
+
             display: flex;
             flex-direction: column;
+
             width: 100%;
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | APP LAYOUT
+        |--------------------------------------------------------------------------
+        */
+
         .app-layout {
             display: flex;
+
             flex: 1;
+
             position: relative;
         }
 
 
-        /* =========================================================
-           NAVBAR
-        ========================================================= */
+        /*
+        |--------------------------------------------------------------------------
+        | NAVBAR
+        |--------------------------------------------------------------------------
+        */
 
         .navbar {
             position: sticky;
+
             top: 0;
+
             z-index: 40;
-            background-color: rgba(255, 255, 255, 0.85);
+
+            background-color: #002B6A;
+
             backdrop-filter: blur(8px);
+
             border-bottom: 1px solid #e2e8f0;
         }
 
+
         .nav-container {
             max-width: 100% !important;
+
             padding: 0 1.5rem;
+
             margin: 0 auto;
+
             display: flex;
+
             justify-content: space-between;
+
             align-items: center;
+
             height: 4rem;
         }
 
+
         .brand-wrapper {
             display: flex;
+
             align-items: center;
+
             gap: 0.75rem;
         }
+
 
         .brand-icon {
             width: 2.5rem;
             height: 2.5rem;
+
             border-radius: 0.75rem;
+
             background-color: transparent;
+
             display: flex;
+
             align-items: center;
             justify-content: center;
         }
+
 
         .brand-icon img {
             width: 100%;
             height: 100%;
+
             object-fit: contain;
+
             display: block;
         }
+
 
         .brand-title {
             font-weight: 700;
-            color: #000080;
+
+            color: #FFFFFF;
+
             font-style: italic;
+
             font-size: 1rem;
+
             display: block;
         }
+
 
         .brand-subtitle {
             font-size: 0.75rem;
-            color: #000080;
+
+            color: #FFFFFF;
+
             font-style: italic;
+
             font-weight: 600;
+
             display: block;
+
             margin-top: -2px;
         }
 
+
         .hamburger-btn {
             background: none;
+
             border: 1px solid #e2e8f0;
+
             border-radius: 0.5rem;
+
             padding: 0.5rem;
+
             cursor: pointer;
+
             display: flex;
+
             align-items: center;
             justify-content: center;
-            color: #475569;
+
+            color: #FFFFFF;
+
             transition: all 0.15s ease;
         }
 
+
         .hamburger-btn:hover {
             background-color: #f1f5f9;
+
             color: #0f172a;
         }
+
 
         .hamburger-btn svg {
             width: 1.25rem;
@@ -153,47 +280,73 @@
         }
 
 
-        /* =========================================================
-           PROFILE
-        ========================================================= */
+        /*
+        |--------------------------------------------------------------------------
+        | PROFILE
+        |--------------------------------------------------------------------------
+        */
 
         .nav-right {
             display: flex;
+
             align-items: center;
+
             gap: 1rem;
         }
 
+
         .profile-btn {
             display: flex;
+
             align-items: center;
+
             gap: 0.5rem;
+
             padding: 0.375rem 0.75rem;
+
             border: 1px solid #e2e8f0;
+
             border-radius: 9999px;
+
             background-color: #ffffff;
+
             color: #334155;
+
             font-size: 0.875rem;
+
             font-weight: 500;
+
             text-decoration: none;
+
             transition: all 0.15s ease;
         }
 
+
         .profile-btn:hover {
             background-color: #f1f5f9;
+
             color: #0f172a;
         }
+
 
         .profile-icon {
             width: 2rem;
             height: 2rem;
+
             border-radius: 50%;
+
             background-color: #eef2ff;
+
             color: #4f46e5;
+
             display: flex;
+
             align-items: center;
             justify-content: center;
+
             overflow: hidden;
         }
+
 
         .profile-icon svg {
             width: 1.25rem;
@@ -201,222 +354,367 @@
         }
 
 
-        /* =========================================================
-           SIDEBAR
-        ========================================================= */
+        /*
+        |--------------------------------------------------------------------------
+        | SIDEBAR
+        |--------------------------------------------------------------------------
+        */
 
         .sidebar {
             width: 260px;
+
             background-color: #ffffff;
+
             border-right: 1px solid #e2e8f0;
+
             display: flex;
+
             flex-direction: column;
+
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
             position: sticky;
+
             top: 4rem;
+
             height: calc(100vh - 4rem);
+
             z-index: 30;
+
             flex-shrink: 0;
         }
+
 
         .sidebar.collapsed {
             margin-left: -260px;
         }
 
+
         .sidebar-content {
             padding: 1.25rem 1rem;
+
             display: flex;
+
             flex-direction: column;
+
             gap: 1.25rem;
+
             overflow-y: auto;
+
             flex-grow: 1;
+
             padding-bottom: 5rem;
         }
 
+
         .sidebar-header-image {
             display: flex;
+
             flex-direction: column;
+
             align-items: center;
+
             text-align: center;
+
             padding-bottom: 1.25rem;
+
             border-bottom: 1px solid #f1f5f9;
         }
 
+
         .sidebar-header-image img {
             width: 140px;
+
             height: auto;
+
             max-height: 90px;
+
             object-fit: contain;
+
             margin-bottom: 0.25rem;
         }
 
 
-        /* =========================================================
-           NAVIGATION
-        ========================================================= */
+        /*
+        |--------------------------------------------------------------------------
+        | NAVIGATION
+        |--------------------------------------------------------------------------
+        */
 
         .nav-links {
             display: flex;
+
             flex-direction: column;
+
             gap: 0.375rem;
         }
 
+
         .nav-link {
             display: flex;
+
             align-items: center;
+
             gap: 0.75rem;
+
             padding: 0.75rem 1rem;
+
             border-radius: 0.5rem;
+
             font-size: 0.875rem;
+
             font-weight: 500;
+
             text-decoration: none;
+
             color: #475569;
+
             background-color: transparent;
+
             transition: all 0.15s ease;
         }
+
 
         .nav-link svg {
             width: 1.25rem;
             height: 1.25rem;
+
             flex-shrink: 0;
+
             color: #64748b;
         }
 
+
         .nav-link:hover {
             color: #0f172a;
+
             background-color: #f1f5f9;
         }
 
+
         .nav-link.active {
             background-color: #eef2ff;
+
             color: #4f46e5;
+
             font-weight: 600;
         }
+
 
         .nav-link.active svg {
             color: #4f46e5;
         }
 
 
-        /* =========================================================
-           SIDEBAR FOOTER
-        ========================================================= */
+        /*
+        |--------------------------------------------------------------------------
+        | SIDEBAR FOOTER
+        |--------------------------------------------------------------------------
+        */
 
         .sidebar-footer {
             position: absolute;
+
             bottom: 0;
             left: 0;
+
             width: 100%;
+
             padding: 1rem;
+
             border-top: 1px solid #e2e8f0;
+
             background-color: #ffffff;
+
             z-index: 10;
         }
 
+
         .btn-logout {
             display: flex;
+
             align-items: center;
+
             gap: 0.75rem;
+
             padding: 0.75rem 1rem;
+
             border-radius: 0.5rem;
+
             font-size: 0.875rem;
+
             font-weight: 500;
+
             font-family: inherit;
+
             background-color: #dc2626;
+
             color: #ffffff;
+
             border: 1px solid #b91c1c;
+
             cursor: pointer;
+
             width: 100%;
+
             text-align: left;
+
             line-height: 1.25rem;
+
             transition: background-color 0.2s;
         }
+
 
         .btn-logout:hover {
             background-color: #b91c1c;
         }
 
+
         .btn-logout svg {
             width: 1.25rem;
             height: 1.25rem;
+
             flex-shrink: 0;
+
             color: #ffffff;
         }
 
 
-        /* =========================================================
-           CONTENT
-        ========================================================= */
+        /*
+        |--------------------------------------------------------------------------
+        | CONTENT
+        |--------------------------------------------------------------------------
+        */
 
         .content-wrapper {
             flex-grow: 1;
+
             display: flex;
+
             flex-direction: column;
+
             min-width: 0;
         }
 
+
         .main-content {
             flex-grow: 1;
+
             width: 100%;
+
             padding: 2rem 1.5rem;
+
             display: flex;
+
             flex-direction: column;
         }
 
 
-        /* =========================================================
-           ALERT
-        ========================================================= */
+        /*
+        |--------------------------------------------------------------------------
+        | ALERT SUCCESS
+        |--------------------------------------------------------------------------
+        */
 
         .alert-success {
             margin-bottom: 1.5rem;
+
             padding: 1rem;
+
             background-color: #ecfdf5;
+
             border: 1px solid #a7f3d0;
+
             color: #065f46;
+
             border-radius: 1rem;
+
             display: flex;
+
             align-items: flex-start;
+
             gap: 0.75rem;
+
             font-size: 0.875rem;
+
             font-weight: 500;
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | ALERT ERROR
+        |--------------------------------------------------------------------------
+        */
+
         .alert-error {
             margin-bottom: 1.5rem;
+
             padding: 1rem;
+
             background-color: #fff1f2;
+
             border: 1px solid #fecdd3;
+
             color: #9f1239;
+
             border-radius: 1rem;
+
             display: flex;
+
             align-items: flex-start;
+
             gap: 0.75rem;
+
             font-size: 0.875rem;
         }
 
+
         .alert-error ul {
             list-style-type: disc;
+
             list-style-position: inside;
+
             margin-top: 0.25rem;
         }
 
 
-        /* =========================================================
-           RESPONSIVE
-        ========================================================= */
+        /*
+        |--------------------------------------------------------------------------
+        | RESPONSIVE
+        |--------------------------------------------------------------------------
+        */
 
         @media (max-width: 768px) {
 
             .sidebar {
                 position: fixed;
+
                 left: 0;
+
                 top: 4rem;
+
                 height: calc(100vh - 4rem);
             }
 
+
             .sidebar.collapsed {
                 margin-left: -260px;
+            }
+
+
+            .main-content {
+                padding: 1.25rem;
+            }
+
+
+            .brand-title {
+                font-size: 0.85rem;
+            }
+
+
+            .brand-subtitle {
+                font-size: 0.65rem;
             }
 
         }
@@ -447,6 +745,7 @@
                         @click="sidebarOpen = !sidebarOpen"
                         class="hamburger-btn"
                         title="Toggle Sidebar"
+                        type="button"
                     >
 
                         <svg
@@ -543,6 +842,7 @@
 
                             </div>
 
+
                             <span>
                                 {{ auth()->user()->name ?? 'Profil' }}
                             </span>
@@ -558,7 +858,6 @@
         </div>
 
     </nav>
-
 
 
     {{-- =========================================================
@@ -582,7 +881,7 @@
                 <div class="sidebar-content">
 
 
-                    {{-- Logo Sidebar --}}
+                    {{-- LOGO SIDEBAR --}}
 
                     <div class="sidebar-header-image">
 
@@ -592,7 +891,6 @@
                         >
 
                     </div>
-
 
 
                     {{-- =================================================
@@ -609,7 +907,7 @@
                         @if(auth()->user()->role === 'admin')
 
 
-                            {{-- Dashboard --}}
+                            {{-- DASHBOARD --}}
 
                             <a
                                 href="{{ route('dashboard') }}"
@@ -637,8 +935,7 @@
                             </a>
 
 
-
-                            {{-- Form Penilaian --}}
+                            {{-- FORM PENILAIAN --}}
 
                             <a
                                 href="{{ route('penilaian.index') }}"
@@ -666,10 +963,7 @@
                             </a>
 
 
-
-                            {{-- =================================================
-                                 PEMENANG & SERTIFIKAT
-                            ================================================== --}}
+                            {{-- PEMENANG & SERTIFIKAT --}}
 
                             <a
                                 href="{{ route('pemenang.sertifikat') }}"
@@ -697,8 +991,7 @@
                             </a>
 
 
-
-                            {{-- Pengolahan Data --}}
+                            {{-- PENGOLAHAN DATA --}}
 
                             <a
                                 href="{{ route('pengolahan.data') }}"
@@ -726,8 +1019,7 @@
                             </a>
 
 
-
-                            {{-- Pengaturan Aplikasi --}}
+                            {{-- PENGATURAN APLIKASI --}}
 
                             <a
                                 href="{{ route('pengaturan.app') }}"
@@ -768,7 +1060,7 @@
                         @elseif(auth()->user()->role === 'user')
 
 
-                            {{-- Dashboard User --}}
+                            {{-- DASHBOARD USER --}}
 
                             <a
                                 href="{{ route('user.dashboard') }}"
@@ -796,8 +1088,7 @@
                             </a>
 
 
-
-                            {{-- Penilaian User --}}
+                            {{-- PENILAIAN USER --}}
 
                             <a
                                 href="{{ route('user.penilaian') }}"
@@ -832,7 +1123,7 @@
                         @elseif(auth()->user()->role === 'viewer')
 
 
-                            {{-- Penilaian Viewer --}}
+                            {{-- PENILAIAN VIEWER --}}
 
                             <a
                                 href="{{ route('viewer.penilaian') }}"
@@ -858,7 +1149,6 @@
                                 Penilaian
 
                             </a>
-
 
                         @endif
 
@@ -915,7 +1205,6 @@
         @endauth
 
 
-
         {{-- =========================================================
              CONTENT
         ========================================================= --}}
@@ -924,14 +1213,15 @@
 
             <main
                 class="main-content"
-
                 @if(request()->routeIs('login', 'register'))
                     style="padding:0;max-width:100%;"
                 @endif
             >
 
 
-                {{-- SUCCESS --}}
+                {{-- =================================================
+                     SUCCESS
+                ================================================== --}}
 
                 @if(session('success'))
 
@@ -958,9 +1248,7 @@
                         </svg>
 
                         <div>
-
                             {{ session('success') }}
-
                         </div>
 
                     </div>
@@ -968,8 +1256,9 @@
                 @endif
 
 
-
-                {{-- ERRORS --}}
+                {{-- =================================================
+                     ERRORS
+                ================================================== --}}
 
                 @if($errors->any() && !request()->routeIs('login', 'register'))
 
@@ -994,6 +1283,7 @@
                             />
 
                         </svg>
+
 
                         <div>
 
@@ -1020,8 +1310,9 @@
                 @endif
 
 
-
-                {{-- PAGE CONTENT --}}
+                {{-- =================================================
+                     PAGE CONTENT
+                ================================================== --}}
 
                 @yield('content')
 

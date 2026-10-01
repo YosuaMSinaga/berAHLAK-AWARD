@@ -35,7 +35,7 @@
     }
 
     .pengaturan-container {
-        padding: 30px;
+        padding: 8px 16px;
         background: var(--background-color);
         min-height: calc(100vh - 70px);
         font-family: 'Lato', sans-serif;
@@ -48,7 +48,7 @@
     .page-title {
         margin: 0;
         color: var(--text-dark);
-        font-size: 26px;
+        font-size: 20px;
         font-weight: 700;
     }
 
@@ -69,7 +69,7 @@
     }
 
     .card-header-custom {
-        padding: 20px 24px;
+        padding: 12px 16px;
         border-bottom: 1px solid var(--border-color);
         background: var(--white);
     }
@@ -82,7 +82,7 @@
     }
 
     .card-body-custom {
-        padding: 24px;
+        padding: 16px;
     }
 
     .form-label-custom {
@@ -96,14 +96,14 @@
     .form-control-custom,
     .form-select-custom {
         width: 100%;
-        height: 44px;
-        padding: 8px 14px;
+        height: 36px;
+        padding: 6px 10px;
         border: 1px solid #cfd8dc;
-        border-radius: 8px;
+        border-radius: 6px;
         background: #fff;
         color: var(--text-dark);
         font-family: 'Lato', sans-serif;
-        font-size: 14px;
+        font-size: 13px;
         outline: none;
         transition: all 0.2s ease;
         box-sizing: border-box;
@@ -137,10 +137,10 @@
     .custom-btn-success-main {
         background: var(--primary-color);
         color: #fff;
-        border-radius: 8px;
-        height: 42px;
-        padding: 0 20px;
-        font-size: 14px;
+        border-radius: 6px;
+        height: 36px;
+        padding: 0 12px;
+        font-size: 13px;
     }
 
     .custom-btn-success-main:hover {
@@ -160,10 +160,10 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        height: 28px;
-        padding: 0 12px;
-        border-radius: 50px;
-        font-size: 12.5px;
+        height: 24px;
+        padding: 0 8px;
+        border-radius: 30px;
+        font-size: 12px;
         font-weight: 700;
     }
 
@@ -214,11 +214,11 @@
     }
 
     .table-custom thead th {
-        padding: 16px 20px;
+        padding: 10px 12px;
         background: #f8fafc;
         border-bottom: 2px solid var(--border-color);
         color: #475569;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.6px;
@@ -226,10 +226,10 @@
     }
 
     .table-custom tbody td {
-        padding: 16px 20px;
+        padding: 10px 12px;
         border-bottom: 1px solid #f1f5f9;
         color: var(--text-dark);
-        font-size: 14px;
+        font-size: 13px;
         vertical-align: middle;
     }
 
@@ -263,13 +263,13 @@
     .form-row {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
+        gap: 12px;
     }
 
     .form-row-three {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
+        gap: 12px;
     }
 
     @media (max-width: 768px) {
@@ -384,9 +384,9 @@
 
                     {{-- Kuota Pemenang --}}
                     <div class="form-group-custom">
-                        <label for="kuota_pemenang" class="form-label-custom">Kuota Pemenang</label>
-                        <input type="number" name="kuota_pemenang" id="kuota_pemenang" class="form-control-custom" placeholder="0" min="1" value="{{ old('kuota_pemenang') }}" required>
-                        @error('kuota_pemenang')
+                        <label for="pemenang" class="form-label-custom">Kuota Pemenang</label>
+                        <input type="number" name="pemenang" id="pemenang" class="form-control-custom" placeholder="0" min="1" value="{{ old('pemenang') }}" required>
+                        @error('pemenang')
                             <span class="error-text">{{ $message }}</span>
                         @enderror
                     </div>
@@ -433,7 +433,7 @@
                                 <span class="custom-badge badge-light">{{ $riwayat->max_pilihan }} Terdisplay</span>
                             </td>
                             <td class="text-center">
-                                <span class="custom-badge badge-light">{{ $riwayat->kuota_pemenang }} Pegawai</span>
+                                <span class="custom-badge badge-light">{{ $riwayat->pemenang }} Pegawai</span>
                             </td>
                             <td class="text-center">
                                 @if($riwayat->status === 'aktif')

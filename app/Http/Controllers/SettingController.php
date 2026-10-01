@@ -61,10 +61,9 @@ class SettingController extends Controller
                 'min:1',
             ],
 
-            'kuota_pemenang' => [
+            'pemenang' => [
                 'required',
-                'integer',
-                'min:1',
+                'array',
             ],
         ]);
 
@@ -96,7 +95,7 @@ class SettingController extends Controller
             'value' => $validated['value'],
             'jum_pilihan' => (int) $validated['jum_pilihan'],
             'max_pilihan' => (int) $validated['max_pilihan'],
-            'kuota_pemenang' => (int) $validated['kuota_pemenang'],
+            'pemenang' => (int) $validated['pemenang'],
 
             'status' => 'aktif',
 

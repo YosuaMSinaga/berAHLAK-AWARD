@@ -7,22 +7,28 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PenilaianController;
-use App\Http\Controllers\SettingController;
+use App\Http\Controllers\PengaturanController;
 use App\Http\Controllers\PemenangController;
+use App\Http\Controllers\ProfilController;
 
 use App\Models\Penilaian;
+use App\Models\Olah;
+use App\Models\Setting;
 
 
 /*
 |--------------------------------------------------------------------------
-| HALAMAN AWAL
+| HALAMAN AWAL / ROOT
 |--------------------------------------------------------------------------
 */
 
 Route::get('/', function () {
 
-    return redirect()->route('login');
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
 
+    return redirect()->route('login');
 });
 
 
@@ -34,66 +40,14 @@ Route::get('/', function () {
 
 Route::middleware('guest')->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | LOGIN
-    |--------------------------------------------------------------------------
-    */
+    // LOGIN
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.process');
 
-    Route::get('/login', [
-        AuthController::class,
-        'showLogin'
-    ])->name('login');
-
-
-    Route::post('/login', [
-        AuthController::class,
-        'login'
-    ])->name('login.process');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | REGISTER
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get('/register', [
-        AuthController::class,
-        'showRegister'
-    ])->name('register');
-
-
-    Route::post('/register', [
-        AuthController::class,
-        'register'
-    ])->name('register.process');
-
+    // REGISTER
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.process');
 });
-
-
-/*
-|--------------------------------------------------------------------------
-| LOGOUT
-|--------------------------------------------------------------------------
-*/
-
-Route::post('/logout', function (Request $request) {
-
-    Auth::logout();
-
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-
-    return redirect()
-        ->route('login')
-        ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
-        ->header('Pragma', 'no-cache')
-        ->header('Expires', '0');
-
-})
-    ->middleware('auth')
-    ->name('logout');
 
 
 /*
@@ -107,151 +61,92 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | ADMIN
+    | LOGOUT
     |--------------------------------------------------------------------------
     */
 
-    Route::middleware('role:admin')->group(function () {
+    Route::post('/logout', function (Request $request) {
 
-        /*
-        |--------------------------------------------------------------------------
-        | DASHBOARD ADMIN
-        |--------------------------------------------------------------------------
-        */
+        Auth::logout();
 
-        Route::get('/dashboard', [
-            DashboardController::class,
-            'index'
-        ])->name('dashboard');
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
+        return redirect()
+            ->route('login')
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
 
-        /*
-        |--------------------------------------------------------------------------
-        | PENILAIAN
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get('/penilaian', [
-            PenilaianController::class,
-            'index'
-        ])->name('penilaian.index');
+    })->name('logout');
 
 
-        Route::get('/penilaian/create', [
-            PenilaianController::class,
-            'create'
-        ])->name('penilaian.create');
+    /*
+    |--------------------------------------------------------------------------
+    | DASHBOARD UTAMA
+    |--------------------------------------------------------------------------
+    | Dashboard diarahkan sesuai role melalui DashboardController.
+    */
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 
-        Route::post('/penilaian', [
-            PenilaianController::class,
-            'store'
-        ])->name('penilaian.store');
+    /*
+    |--------------------------------------------------------------------------
+    | DASHBOARD - DATA PERIODE
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/dashboard/periode', [
+        DashboardController::class,
+        'getPeriode'
+    ])->name('dashboard.periode');
+
+    Route::get('/dashboard/data', [
+        DashboardController::class,
+        'getDataByPeriode'
+    ])->name('dashboard.data');
 
 
-        Route::get('/penilaian/{penilaian}', [
-            PenilaianController::class,
-            'show'
-        ])->name('penilaian.show');
+    /*
+    |--------------------------------------------------------------------------
+    | DASHBOARD - LAPORAN KOMPETENSI PERILAKU PRIBADI  (BARU)
+    |--------------------------------------------------------------------------
+    | Berada di grup auth (bukan role:*) agar bisa dipanggil admin, user,
+    | dan viewer. Data dibatasi lewat NIP user yang sedang login.
+    */
+
+    Route::get('/dashboard/laporan-pribadi', [
+        DashboardController::class,
+        'getLaporanPribadi'
+    ])->name('dashboard.laporan-pribadi');
 
 
-        Route::get('/penilaian/{penilaian}/edit', [
-            PenilaianController::class,
-            'edit'
-        ])->name('penilaian.edit');
+    /*
+    |--------------------------------------------------------------------------
+    | PROFIL
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/profil', [ProfilController::class, 'index'])->name('profil');
+    Route::put('/profil', [ProfilController::class, 'update'])->name('profil.update');
 
 
-        Route::put('/penilaian/{penilaian}', [
-            PenilaianController::class,
-            'update'
-        ])->name('penilaian.update');
+    /*
+    |--------------------------------------------------------------------------
+    | FORM PENILAIAN UMUM
+    |--------------------------------------------------------------------------
+    */
 
-
-        Route::patch('/penilaian/{penilaian}', [
-            PenilaianController::class,
-            'update'
-        ])->name('penilaian.update.patch');
-
-
-        Route::delete('/penilaian/{penilaian}', [
-            PenilaianController::class,
-            'destroy'
-        ])->name('penilaian.destroy');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | PENGATURAN APLIKASI
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get('/pengaturan-aplikasi', [
-            SettingController::class,
-            'index'
-        ])->name('pengaturan.app');
-
-
-        Route::post('/setting', [
-            SettingController::class,
-            'store'
-        ])->name('setting.store');
-
-
-        Route::patch('/setting/{id}/aktifkan', [
-            SettingController::class,
-            'aktifkan'
-        ])->name('setting.aktifkan');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | PEMENANG & SERTIFIKAT
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get('/pemenang-sertifikat', [
-            PemenangController::class,
-            'index'
-        ])->name('pemenang.sertifikat');
-
-
-        Route::get('/pemenang/periode-aktif', [
-            PemenangController::class,
-            'periodeAktif'
-        ])->name('pemenang.periode-aktif');
-
-
-        Route::get('/pemenang/riwayat', [
-            PemenangController::class,
-            'riwayat'
-        ])->name('pemenang.riwayat');
-
-
-        Route::post('/pemenang/tetapkan', [
-            PemenangController::class,
-            'tetapkan'
-        ])->name('pemenang.tetapkan');
-
-
-        Route::post('/pemenang/update-nosertifikat', [
-            PemenangController::class,
-            'updateNoSertifikat'
-        ])->name('pemenang.update-nosert');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | PENGOLAHAN DATA
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get('/pengolahan-data', function () {
-
-            return view('pengolahan.data');
-
-        })->name('pengolahan.data');
-
-    });
+    Route::get('/penilaian', [PenilaianController::class, 'index'])->name('penilaian.index');
+    Route::get('/penilaian/create', [PenilaianController::class, 'create'])->name('penilaian.create');
+    Route::get('/penilaian/form/{setting}', [PenilaianController::class, 'form'])->name('penilaian.form');
+    Route::post('/penilaian', [PenilaianController::class, 'store'])->name('penilaian.store');
+    Route::get('/penilaian/{penilaian}', [PenilaianController::class, 'show'])->name('penilaian.show');
+    Route::get('/penilaian/{penilaian}/edit', [PenilaianController::class, 'edit'])->name('penilaian.edit');
+    Route::put('/penilaian/{penilaian}', [PenilaianController::class, 'update'])->name('penilaian.update');
+    Route::patch('/penilaian/{penilaian}', [PenilaianController::class, 'update'])->name('penilaian.update.patch');
+    Route::delete('/penilaian/{penilaian}', [PenilaianController::class, 'destroy'])->name('penilaian.destroy');
 
 
     /*
@@ -262,134 +157,31 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:user')->group(function () {
 
-        /*
-        |--------------------------------------------------------------------------
-        | DASHBOARD USER
-        |--------------------------------------------------------------------------
-        */
-
+        // DASHBOARD USER
         Route::get('/user/dashboard', function () {
 
             $totalPenilaian = Penilaian::count();
 
-            return view(
-                'dashboard.user',
-                compact('totalPenilaian')
-            );
+            return view('dashboard.user', compact('totalPenilaian'));
 
         })->name('user.dashboard');
 
+        // DASHBOARD USER - PERIODE
+        Route::get('/user/dashboard/periode', [
+            DashboardController::class,
+            'getPeriode'
+        ])->name('user.dashboard.periode');
 
-        /*
-        |--------------------------------------------------------------------------
-        | PROFIL USER
-        |--------------------------------------------------------------------------
-        */
+        Route::get('/user/dashboard/data', [
+            DashboardController::class,
+            'getDataByPeriode'
+        ])->name('user.dashboard.data');
 
-        Route::get('/user/profil', function () {
-
-            return view(
-                'dashboard.userpage.profil'
-            );
-
-        })->name('profil');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | UPDATE PROFIL USER
-        |--------------------------------------------------------------------------
-        */
-
-        Route::put('/user/profil', function (Request $request) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | AMBIL USER YANG SEDANG LOGIN
-            |--------------------------------------------------------------------------
-            */
-
-            $user = Auth::user();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | CEK USER
-            |--------------------------------------------------------------------------
-            */
-
-            if (!$user) {
-
-                return redirect()
-                    ->route('login')
-                    ->with(
-                        'error',
-                        'Sesi pengguna tidak ditemukan.'
-                    );
-
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | VALIDASI
-            |--------------------------------------------------------------------------
-            */
-
-            $validated = $request->validate([
-
-                'name' => [
-                    'required',
-                    'string',
-                    'max:255',
-                ],
-
-            ]);
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | UPDATE NAMA USER
-            |--------------------------------------------------------------------------
-            */
-
-            $user->name = $validated['name'];
-
-            $user->save();
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | KEMBALI KE HALAMAN PROFIL
-            |--------------------------------------------------------------------------
-            */
-
-            return redirect()
-                ->route('profil')
-                ->with(
-                    'success',
-                    'Profil berhasil diperbarui.'
-                );
-
-        })->name('profil.update');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | PENILAIAN USER
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get('/user/penilaian', [
-            PenilaianController::class,
-            'index'
-        ])->name('user.penilaian');
-
-
-        Route::get('/user/penilaian/{penilaian}', [
-            PenilaianController::class,
-            'show'
-        ])->name('user.penilaian.show');
+        // PENILAIAN USER
+        Route::get('/user/penilaian', [PenilaianController::class, 'index'])->name('user.penilaian');
+        Route::get('/user/penilaian/form/{setting}', [PenilaianController::class, 'form'])->name('user.penilaian.form');
+        Route::post('/user/penilaian', [PenilaianController::class, 'store'])->name('user.penilaian.store');
+        Route::get('/user/penilaian/{penilaian}', [PenilaianController::class, 'show'])->name('user.penilaian.show');
 
     });
 
@@ -402,16 +194,102 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:viewer')->group(function () {
 
+        Route::get('/viewer/penilaian', [PenilaianController::class, 'index'])->name('viewer.penilaian');
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware('role:admin')->group(function () {
+
+        // DATA DASHBOARD ADMIN
+        Route::get('/admin/dashboard/periode', [
+            DashboardController::class,
+            'getPeriode'
+        ])->name('admin.dashboard.periode');
+
+        Route::get('/admin/dashboard/data', [
+            DashboardController::class,
+            'getDataByPeriode'
+        ])->name('admin.dashboard.data');
+
+        // PENILAIAN ADMIN
+        Route::get('/admin/penilaian', [PenilaianController::class, 'index'])->name('admin.penilaian');
+        Route::get('/admin/penilaian/create', [PenilaianController::class, 'create'])->name('admin.penilaian.create');
+        Route::get('/admin/penilaian/form/{setting}', [PenilaianController::class, 'form'])->name('admin.penilaian.form');
+        Route::post('/admin/penilaian', [PenilaianController::class, 'store'])->name('admin.penilaian.store');
+
+
         /*
         |--------------------------------------------------------------------------
-        | PENILAIAN VIEWER
+        | PENGOLAHAN DATA
         |--------------------------------------------------------------------------
         */
 
-        Route::get('/viewer/penilaian', [
-            PenilaianController::class,
-            'index'
-        ])->name('viewer.penilaian');
+        Route::get('/pengolahan-data', function () {
+
+            // Periode aktif
+            $settingPeriode = Setting::where('key', 'periode')->first();
+
+            $periodeAktif = $settingPeriode->value ?? '2026 06';
+
+            // Data olah berdasarkan periode
+            $dataOlah = Olah::where('periode', $periodeAktif)
+                ->orderBy('nip', 'asc')
+                ->get();
+
+            $jumlahData = $dataOlah->count();
+
+            // Rerata Self = rata-rata skor_berakhlak
+            $rerataSelf = $jumlahData > 0 ? $dataOlah->avg('skor_berakhlak') : 0;
+
+            // Rerata Peer = rata-rata skor_rekan_2
+            $rerataPeer = $jumlahData > 0 ? $dataOlah->avg('skor_rekan_2') : 0;
+
+            // Rerata Akhir = rata-rata skor_akhir
+            $rerataAkhir = $jumlahData > 0 ? $dataOlah->avg('skor_akhir') : 0;
+
+            return view('dashboard.page.Olah', [
+                'periodeAktif' => $periodeAktif,
+                'dataOlah' => $dataOlah,
+                'jumlahData' => $jumlahData,
+                'rerataSelf' => $rerataSelf,
+                'rerataPeer' => $rerataPeer,
+                'rerataAkhir' => $rerataAkhir,
+            ]);
+
+        })->name('pengolahan.data');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PENGATURAN APLIKASI
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/pengaturan-aplikasi', [PengaturanController::class, 'index'])->name('pengaturan.app');
+        Route::put('/pengaturan-aplikasi', [PengaturanController::class, 'update'])->name('pengaturan.app.update');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PEMENANG & SERTIFIKAT
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/pemenang-sertifikat', [PemenangController::class, 'index'])->name('pemenang.sertifikat');
+        Route::get('/pemenang/periode-aktif', [PemenangController::class, 'periodeAktif'])->name('pemenang.periode-aktif');
+        Route::get('/pemenang/riwayat', [PemenangController::class, 'riwayat'])->name('pemenang.riwayat');
+        Route::get('/pemenang-sertifikat/preview/{id}', [PemenangController::class, 'preview'])->name('pemenang.preview');
+        Route::post('/pemenang/tetapkan', [PemenangController::class, 'tetapkan'])->name('pemenang.tetapkan');
+        Route::post('/pemenang/update-nosertifikat', [PemenangController::class, 'updateNoSertifikat'])->name('pemenang.update-nosert');
+        Route::put('/pemenang-sertifikat/{id}', [PemenangController::class, 'update'])->name('pemenang.update');
+        Route::get('/pemenang-sertifikat/{id}/download', [PemenangController::class, 'download'])->name('pemenang.download');
 
     });
 

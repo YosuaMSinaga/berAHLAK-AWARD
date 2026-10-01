@@ -49,7 +49,7 @@ class PemenangController extends Controller
                 'core_value' => $setting->value,
 
                 'kuota' => (int) (
-                    $setting->kuota_pemenang ?? 1
+                    $setting->pemenang ?? 1
                 ),
             ],
         ]);
@@ -169,7 +169,7 @@ class PemenangController extends Controller
             $coreValue = $setting->value;
 
             $kuota = (int) (
-                $setting->kuota_pemenang ?? 1
+                $setting->pemenang ?? 1
             );
 
 
